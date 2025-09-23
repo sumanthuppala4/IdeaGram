@@ -18,7 +18,6 @@ db.serialize(() => {
   db.run(`
     CREATE TABLE IF NOT EXISTS ideas (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
       description TEXT,
       authorId INTEGER NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,

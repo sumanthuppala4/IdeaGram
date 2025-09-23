@@ -12,7 +12,9 @@ div {
 }
 
 /* Headings */
-h2, h3, h4 {
+h2,
+h3,
+h4 {
   color: #333;
 }
 
@@ -76,14 +78,24 @@ button:hover {
   padding: 20px;
 }
 
-.register-link{
-    color: white;
-    background-color: rgb(48, 222, 36);
+.register-link {
+  color: white;
+  background-color: rgb(48, 222, 36);
 }
 
-.signup-container{
-    padding: 32px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.like-btn {
+  border: none;
+  background: none;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
 }
+
+.like-btn:hover {
+  transform: scale(1.2);
+}
+
+.like-btn.liked {
+  color: red; /* filled heart when liked */
+}
+

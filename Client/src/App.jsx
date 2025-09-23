@@ -1,53 +1,33 @@
-import { useState } from "react";
-
-
-
-import "./styles.css";
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
-import UserSignUp from "./components/UserSignUp";
+import "./App.css";
 
 function App() {
-  const [user, setUser] = useState(
-    localStorage.getItem("token") ? "User" : null
-  );
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-
-    setUser(null);
-  };
-
-  if (!user) {
-    return (
-      <div className="fb-container">
-        {/* Left side: Intro / logo */}
-
-        <div className="fb-left">
-          <h1>Idea Sharing App</h1>
-
-          <p>Share ideas with the world and like others' ideas!</p>
-        </div>
-
-        {/* Right side: Login + Signup */}
-
-        <div className="fb-right">
-          <div className="fb-card">
-            <UserSignUp />
-          </div>
-          
-        </div>
-      </div>
-    );
-  }
+  // get token from localStorage
+  const token = localStorage.getItem("token");
 
   return (
-    <div className="app-container">
-      <button className="logout-btn" onClick={handleLogout}>
-        Logout
-      </button>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
 
-      <Dashboard username={user} />
-    </div>
+        {/* Protect dashboard: only show if logged in */}
+        <Route
+          path="/dashboard"
+          element={token ? <Dashboard /> : <Navigate to="/login" />}
+        />
+      </Routes>
+    </Router>
   );
 }
 

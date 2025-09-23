@@ -3,9 +3,9 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:5000/api";
 
-export default function UserSignUp({}) {
-  const [username, setUsername] = useState("sumanth");
-  const [password, setPassword] = useState("sumanth");
+export default function UserSignUp({setUser}) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [mode, setMode] = useState("login");
 
   const handleLogin = async () => {
@@ -17,7 +17,7 @@ export default function UserSignUp({}) {
       const data = res.data;
       if (data.token) {
         localStorage.setItem("token", data.token);
-        onLogin(data.username);
+        setUser(data.username);
       }
     } catch (err) {
       console.log(err.response?.data?.message || "Login failed");
@@ -35,7 +35,7 @@ export default function UserSignUp({}) {
       console.log("Registration response:", data);
       if (data.token) {
         localStorage.setItem("token", data.token);
-        onRegister(data.username);
+        setUser(data.username);
       }
     } catch (err) {
       console.log(err.response?.data?.message || "Registration failed");
