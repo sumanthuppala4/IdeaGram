@@ -1,0 +1,89 @@
+/* General body styling */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container for centered content */
+div {
+  box-sizing: border-box;
+}
+
+/* Headings */
+h2, h3, h4 {
+  color: #333;
+}
+
+/* Inputs */
+input {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  padding: 8px 10px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Buttons */
+button {
+  padding: 8px 15px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Idea Card */
+.idea-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #fff;
+}
+
+/* Author & Likes */
+.idea-info {
+  font-size: 12px;
+  color: #555;
+}
+
+/* Logout Button */
+.logout-btn {
+  float: right;
+  background-color: #dc3545;
+}
+
+.logout-btn:hover {
+  background-color: #a71d2a;
+}
+
+/* Container for app */
+.app-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.register-link{
+    color: white;
+    background-color: rgb(48, 222, 36);
+}
+
+.signup-container{
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
