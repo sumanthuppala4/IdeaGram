@@ -6,8 +6,9 @@ const app = express.Router();
 
 app.post("/", auth, (req, res) => {
   const { description } = req.body;
-  console.log(req.userId,"userId");
-  const stmt = db.prepare("INSERT INTO ideas(description, authorId) VALUES(?, ?)");
+  const stmt = db.prepare(
+    "INSERT INTO ideas(description, authorId) VALUES(?, ?)"
+  );
   stmt.run(description, req.userId, function (err) {
     if (err) return res.status(500).json({ message: "Error creating idea" });
 
@@ -20,25 +21,25 @@ app.post("/", auth, (req, res) => {
 
 // Get all ideas
 app.get("/", auth, (req, res) => {
+  const userId = req.userId;
   const query = `
       SELECT i.id, i.description, i.createdAt, u.username as author,
-      (SELECT COUNT(*) FROM idea_likes il WHERE il.ideaId = i.id) as likesCount
+      (SELECT COUNT(*) FROM idea_likes il WHERE il.ideaId = i.id) as likesCount,
+      EXISTS(SELECT 1 FROM idea_likes il2 WHERE il2.ideaId = i.id AND il2.userId = ?) as liked
       FROM ideas i
       JOIN users u ON u.id = i.authorId
       ORDER BY i.createdAt DESC
     `;
-  db.all(query, [], (err, rows) => {
+  db.all(query, [userId], (err, rows) => {
     if (err) return res.status(500).json({ message: "Error fetching ideas" });
     res.status(200).json(rows);
   });
 });
 
 app.put("/toggle-like", auth, (req, res) => {
-  console.log(req.body);
-  const { id } = req.body.id;
+  const { id } = req.body;
   const userId = req.userId;
 
-  console.log(id, userId);
 
   // Check if user already liked
   db.get(
@@ -83,6 +84,26 @@ app.put("/toggle-like", auth, (req, res) => {
       }
     }
   );
+});
+
+app.get("/users", auth, (req, res) => {
+  const query = `
+      SELECT * FROM users
+    `;
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ message: "Error fetching users" });
+    res.status(200).json(rows);
+  });
+});
+
+app.get("/likes", auth, (req, res) => {
+  const query = `
+      SELECT * FROM idea_likes
+    `;
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ message: "Error fetching likes" });
+    res.status(200).json(rows);
+  });
 });
 
 module.exports = app;

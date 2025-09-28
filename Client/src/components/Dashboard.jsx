@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = "http://localhost:5000/api";
+
 function Dashboard() {
   const [ideas, setIdeas] = useState([]);
   const [newIdea, setNewIdea] = useState("");
@@ -15,7 +17,7 @@ function Dashboard() {
     }
 
     axios
-      .get("http://localhost:5000/api/ideas", {
+      .get(`${BASE_URL}/ideas`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setIdeas(res.data))
@@ -27,8 +29,8 @@ function Dashboard() {
 
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/ideas",
-        { content: newIdea },
+        `${BASE_URL}/ideas`,
+        { description: newIdea },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIdeas([...ideas, { ...res.data, liked: false }]);
@@ -41,15 +43,21 @@ function Dashboard() {
   const handleToggleLike = async (id) => {
     try {
       const res = await axios.put(
-        `http://localhost:5000/api/ideas/toggle-like`,
+        `${BASE_URL}/ideas/toggle-like`,
         { id },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
+      console.log(res, "toggle like response");
+
       setIdeas(
         ideas.map((idea) =>
           idea.id === id
-            ? { ...idea, likes: res.data.likes, liked: res.data.liked }
+            ? {
+                ...idea,
+                likesCount: res.data.likes,
+                liked: res.data.liked,
+              }
             : idea
         )
       );
@@ -62,6 +70,8 @@ function Dashboard() {
     localStorage.removeItem("token");
     navigate("/login");
   };
+
+  console.log(ideas, "ideas");
 
   return (
     <div className="dashboard-container">
@@ -88,14 +98,16 @@ function Dashboard() {
         ) : (
           ideas.map((idea) => (
             <div key={idea.id} className="idea-card">
+              <p>Idea By :{idea.author}</p>
               <p>{idea.description}</p>
               <div className="idea-actions">
                 <button
                   className={`like-btn ${idea.liked ? "liked" : ""}`}
                   onClick={() => handleToggleLike(idea.id)}
                 >
-                  {idea.liked ? "❤️" : "🤍"} {idea.likesCount}
+                  {idea.liked ? "❤️" : "🤍"}
                 </button>
+                &nbsp; {idea.likesCount}
               </div>
             </div>
           ))

@@ -56,8 +56,7 @@ function Signup() {
       {error && <p className="error">{error}</p>}
 
       <p>
-        Already have an account?{" "}
-        <Link to="/login">Login</Link>
+        Already have an account? <Link to="/login">Login</Link>
       </p>
     </div>
   );

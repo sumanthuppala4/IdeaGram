@@ -99,3 +99,6 @@ button:hover {
   color: red; /* filled heart when liked */
 }
 
+.dashboard-container {
+  padding: 8px 20px;
+}
