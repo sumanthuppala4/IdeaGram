@@ -12,9 +12,15 @@ app.post("/", auth, (req, res) => {
   stmt.run(description, req.userId, function (err) {
     if (err) return res.status(500).json({ message: "Error creating idea" });
 
-    db.get("SELECT * FROM ideas WHERE id = ?", [this.lastID], (err, idea) => {
-      res.status(200).json(idea);
-    });
+    db.get(
+      "SELECT i.id, i.description, i.createdAt, u.username as author FROM ideas i JOIN users u ON u.id = i.authorId WHERE i.id = ?",
+      [this.lastID],
+      (err, idea) => {
+        if (err)
+          return res.status(500).json({ message: err + "Error fetching idea" });
+        res.status(200).json(idea);
+      }
+    );
   });
   stmt.finalize();
 });
@@ -39,7 +45,6 @@ app.get("/", auth, (req, res) => {
 app.put("/toggle-like", auth, (req, res) => {
   const { id } = req.body;
   const userId = req.userId;
-
 
   // Check if user already liked
   db.get(
