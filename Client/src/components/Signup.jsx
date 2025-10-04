@@ -23,7 +23,7 @@ function Signup() {
       setMsg(res.data.message || "Registered successfully!");
 
       // redirect after short delay
-      setTimeout(() => navigate("/login"), 1000);
+      setTimeout(() => navigate("/dashboard"), 1000);
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Try again.");
     }
