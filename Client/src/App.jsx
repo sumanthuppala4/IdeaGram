@@ -9,6 +9,7 @@ import Login from "./components/Login";
 import Signup from "./components/Signup";
 import Dashboard from "./components/Dashboard";
 import "./App.css";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   // get token from localStorage
@@ -22,9 +23,14 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         {/* Protect dashboard: only show if logged in */}
+
         <Route
           path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/login" />}
+          element={
+            <ProtectedRoute>
+              <Dashboard />{" "}
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </Router>

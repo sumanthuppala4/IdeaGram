@@ -1,15 +1,21 @@
 const express = require("express");
 const db = require("../db/database");
-const auth = require("../middleware/auth");
 
 const app = express.Router();
 
+function auth(req, res, next) {
+  if (req.isAuthenticated()) return next();
+  return res.status(401).json({ message: "Unauthorized" });
+}
+
+
 app.post("/", auth, (req, res) => {
   const { description } = req.body;
+  const userId=req.user.id;
   const stmt = db.prepare(
     "INSERT INTO ideas(description, authorId) VALUES(?, ?)"
   );
-  stmt.run(description, req.userId, function (err) {
+  stmt.run(description, userId, function (err) {
     if (err) return res.status(500).json({ message: "Error creating idea" });
 
     db.get(
@@ -27,7 +33,7 @@ app.post("/", auth, (req, res) => {
 
 // Get all ideas
 app.get("/", auth, (req, res) => {
-  const userId = req.userId;
+  const userId = req.user.id;
   const query = `
       SELECT i.id, i.description, i.createdAt, u.username as author,
       (SELECT COUNT(*) FROM idea_likes il WHERE il.ideaId = i.id) as likesCount,
@@ -44,24 +50,24 @@ app.get("/", auth, (req, res) => {
 
 app.put("/toggle-like", auth, (req, res) => {
   const { id } = req.body;
-  const userId = req.userId;
+  const userId = req.user.id;
 
   // Check if user already liked
   db.get(
-    "SELECT * FROM idea_likes WHERE idea_id = ? AND user_id = ?",
+    "SELECT * FROM idea_likes WHERE ideaId = ? AND userId = ?",
     [id, userId],
     (err, row) => {
       if (row) {
         // Unlike (remove like)
         db.run(
-          "DELETE FROM idea_likes WHERE idea_id = ? AND user_id = ?",
+          "DELETE FROM idea_likes WHERE ideaId = ? AND userId = ?",
           [id, userId],
           (err2) => {
             if (err2) return res.status(500).json({ error: err2.message });
 
             // Update likes count
             db.get(
-              "SELECT COUNT(*) as likes FROM idea_likes WHERE idea_id = ?",
+              "SELECT COUNT(*) as likes FROM idea_likes WHERE ideaId = ?",
               [id],
               (err3, countRow) => {
                 res.json({ liked: false, likes: countRow.likes });

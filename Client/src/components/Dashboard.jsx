@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import LogoutButton from "./LogoutButton";
 
 const BASE_URL = "http://localhost:5000/api";
 
@@ -11,18 +12,11 @@ function Dashboard() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
     axios
-      .get(`${BASE_URL}/ideas`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(`${BASE_URL}/ideas`, { withCredentials: true })
       .then((res) => setIdeas(res.data))
       .catch(() => navigate("/login"));
-  }, [navigate, token]);
+  }, []);
 
   const handleAddIdea = async () => {
     if (!newIdea.trim()) return;
@@ -31,7 +25,7 @@ function Dashboard() {
       const res = await axios.post(
         `${BASE_URL}/ideas`,
         { description: newIdea },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       setIdeas([...ideas, { ...res.data, liked: false }]);
       setNewIdea("");
@@ -45,10 +39,9 @@ function Dashboard() {
       const res = await axios.put(
         `${BASE_URL}/ideas/toggle-like`,
         { id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
 
-      console.log(res, "toggle like response");
 
       setIdeas(
         ideas.map((idea) =>
@@ -66,20 +59,11 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
-  console.log(ideas, "ideas");
-
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">
         <h2>Ideas Dashboard</h2>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <LogoutButton />
       </div>
 
       <div className="add-idea">

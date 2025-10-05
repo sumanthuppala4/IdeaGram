@@ -15,15 +15,19 @@ function Signup() {
     setMsg("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", {
-        username,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/register",
+        {
+          username,
+          password,
+        },
+        { withCredentials: true }
+      );
 
       setMsg(res.data.message || "Registered successfully!");
 
       // redirect after short delay
-      setTimeout(() => navigate("/dashboard"), 1000);
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Try again.");
     }

@@ -13,15 +13,22 @@ function Login() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        username,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/login",
+        {
+          username,
+          password,
+        },
+        { withCredentials: true }
+      );
 
-      localStorage.setItem("token", res.data.token); // save JWT
       navigate("/dashboard"); // redirect to dashboard
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Try again.");
+      setError(
+        err.response?.data?.message ||
+          err.response.data.error ||
+          "Login failed. Try again."
+      );
     }
   };
 
