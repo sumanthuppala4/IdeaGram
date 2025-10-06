@@ -20,6 +20,7 @@ function Signup() {
         password,
       });
 
+      localStorage.setItem("token", res.data.token);
       setMsg(res.data.message || "Registered successfully!");
 
       // redirect after short delay
