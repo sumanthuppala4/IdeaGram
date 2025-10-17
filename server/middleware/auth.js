@@ -1,16 +1,37 @@
-const jwt = require("jsonwebtoken");
+import express from "express";
+import passport from "passport";
 
-const auth = (req, res, next) => {
-  const token = req.header("Authorization")?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token, authorization denied" });
+const router = express.Router();
 
-  try {
-    const decoded = jwt.verify(token, "jwtSecretKey");
-    req.userId = decoded.id;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: "Token is not valid" });
+// Google login
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "http://localhost:3000/login",
+    successRedirect: "http://localhost:3000/dashboard",
+  })
+);
+
+// Check if user authenticated
+router.get("/check", (req, res) => {
+  if (req.isAuthenticated()) {
+    res.json({ authenticated: true, user: req.user });
+  } else {
+    res.json({ authenticated: false });
   }
-};
+});
 
-module.exports = auth;
+// Logout
+router.get("/logout", (req, res) => {
+  req.logout(() => {
+    res.json({ message: "Logged out" });
+  });
+});
+
+export default router;

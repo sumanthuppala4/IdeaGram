@@ -8,21 +8,34 @@ function Dashboard() {
   const [ideas, setIdeas] = useState([]);
   const [newIdea, setNewIdea] = useState("");
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  // Using Passport session cookies only (no JWT token)
 
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
+    const fetchIdeas = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/ideas`, {
+          withCredentials: true,
+        });
+        setIdeas(res.data || []);
+      } catch (err) {
+        console.error("Error fetching ideas:", err);
+        if (err?.response?.status === 401) navigate("/login");
+      }
+    };
+    fetchIdeas();
 
-    axios
-      .get(`${BASE_URL}/ideas`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setIdeas(res.data))
-      .catch(() => navigate("/login"));
-  }, [navigate, token]);
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(`${BASE_URL}/ideas/users`, {
+          withCredentials: true,
+        });
+        console.log(res.data, "responseUsers");
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+    fetchUsers();
+  }, []);
 
   const handleAddIdea = async () => {
     if (!newIdea.trim()) return;
@@ -31,7 +44,7 @@ function Dashboard() {
       const res = await axios.post(
         `${BASE_URL}/ideas`,
         { description: newIdea },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
       setIdeas([...ideas, { ...res.data, liked: false }]);
       setNewIdea("");
@@ -45,7 +58,7 @@ function Dashboard() {
       const res = await axios.put(
         `${BASE_URL}/ideas/toggle-like`,
         { id },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { withCredentials: true }
       );
 
       console.log(res, "toggle like response");
@@ -67,8 +80,9 @@ function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    fetch("http://localhost:5000/auth/logout", {
+      credentials: "include",
+    }).finally(() => navigate("/login"));
   };
 
   console.log(ideas, "ideas");

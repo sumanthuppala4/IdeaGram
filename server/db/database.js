@@ -1,30 +1,43 @@
-const sqlite3 = require("sqlite3").verbose();
+import sqlite3 from "sqlite3";
 
-const db = new sqlite3.Database("./ideasDB.sqlite", (err) => {
-  if (err) console.error(err.message);
-  else console.log("Connected to SQLite database");
+// Enable verbose logging (optional)
+sqlite3.verbose();
+
+// Create / connect to database file
+// Note: database file is in the server root, so path is relative to this folder
+const db = new sqlite3.Database("../ideasDB.sqlite", (err) => {
+  if (err) {
+    console.error(" Failed to connect to SQLite database:", err.message);
+  } else {
+    console.log(" Connected to SQLite database");
+  }
 });
 
-// Create tables if not exists
+// Create tables if not exist
 db.serialize(() => {
+  // Users table
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL
+      googleId TEXT UNIQUE,
+      username TEXT ,
+      email TEXT UNIQUE,
+      password TEXT
     )
   `);
 
+  // Ideas table
   db.run(`
     CREATE TABLE IF NOT EXISTS ideas (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      description TEXT,
+      description TEXT NOT NULL,
       authorId INTEGER NOT NULL,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY(authorId) REFERENCES users(id)
     )
   `);
 
+  // Likes table
   db.run(`
     CREATE TABLE IF NOT EXISTS idea_likes (
       userId INTEGER,
@@ -36,4 +49,4 @@ db.serialize(() => {
   `);
 });
 
-module.exports = db;
+export default db;

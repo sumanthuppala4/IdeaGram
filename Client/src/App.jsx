@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,8 +11,19 @@ import Dashboard from "./components/Dashboard";
 import "./App.css";
 
 function App() {
-  // get token from localStorage
-  const token = localStorage.getItem("token");
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
+
+  useEffect(() => {
+    // Check server session (Google OAuth)
+    fetch("http://localhost:5000/auth/check", { credentials: "include" })
+      .then((res) => res.json())
+      .then((data) => {
+        setIsAuthed(Boolean(data?.authenticated));
+      })
+      .catch(() => setIsAuthed(false))
+      .finally(() => setAuthChecked(true));
+  }, []);
 
   return (
     <Router>
@@ -24,7 +35,13 @@ function App() {
         {/* Protect dashboard: only show if logged in */}
         <Route
           path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/login" />}
+          element={
+            authChecked && isAuthed ? (
+              <Dashboard />
+            ) : authChecked ? (
+              <Navigate to="/login" />
+            ) : null
+          }
         />
       </Routes>
     </Router>

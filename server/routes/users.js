@@ -1,9 +1,9 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const db = require("../db/database");
+import db from "../db/database.js";
+import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-const router = express.Router();
+const router = express();
 const JWT_SECRET = "jwtSecretKey";
 
 router.post("/register", (req, res) => {
@@ -49,4 +49,4 @@ router.post("/login", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

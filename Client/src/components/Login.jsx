@@ -1,60 +1,114 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
 
-function Login() {
-  const [username, setUsername] = useState("");
+const API_BASE = "http://localhost:5000"; // backend URL
+
+export default function Login() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
 
+  // normal login handler
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-
     try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        username,
-        password,
-      });
-
-      localStorage.setItem("token", res.data.token); // save JWT
-      navigate("/dashboard"); // redirect to dashboard
+      await axios.post(
+        `${API_BASE}/api/users/login`,
+        { email, password },
+        { withCredentials: true }
+      );
+      window.location.href = "/dashboard";
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Try again.");
+      alert("Login failed");
     }
   };
 
-  return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+  // Google Sign-in handler
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE}/auth/google`;
+  };
 
+  return (
+    <div style={styles.container}>
+      <h2>Login</h2>
+
+      <form onSubmit={handleLogin} style={styles.form}>
+        <input
+          type="email"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={styles.input}
+        />
         <input
           type="password"
           placeholder="Password"
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          style={styles.input}
         />
-
-        <button type="submit">Login</button>
+        <button type="submit" style={styles.btn}>
+          Login
+        </button>
       </form>
 
-      {error && <p className="error">{error}</p>}
+      <div style={styles.divider}>OR</div>
 
-      <p>
-        Don’t have an account? <Link to="/signup">Sign up</Link>
-      </p>
+      {/* Google Login Button */}
+      <button onClick={handleGoogleLogin} style={styles.googleBtn}>
+        <img
+          src="https://developers.google.com/identity/images/g-logo.png"
+          alt="Google"
+          style={{ width: 20, marginRight: 8, color: "black" }}
+        />
+        Sign in with Google
+      </button>
     </div>
   );
 }
 
-export default Login;
+const styles = {
+  container: {
+    maxWidth: 400,
+    margin: "80px auto",
+    padding: 20,
+    border: "1px solid #ddd",
+    borderRadius: 10,
+    textAlign: "center",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
+  input: {
+    padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
+  },
+  btn: {
+    padding: "10px",
+    background: "#4f46e5",
+    color: "#fff",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+  },
+  googleBtn: {
+    color:"black",
+    marginTop: 10,
+    padding: "10px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#fff",
+    border: "1px solid #ccc",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: 500,
+  },
+  divider: {
+    margin: "15px 0",
+    color: "#888",
+  },
+};
