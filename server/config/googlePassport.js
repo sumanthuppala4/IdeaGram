@@ -18,8 +18,8 @@ passport.use(
       const email = profile.emails?.[0]?.value || null;
 
       db.get(
-        "SELECT * FROM users WHERE googleId = ?",
-        [googleId],
+        "SELECT * FROM users WHERE username = ?",
+        [email],
         (err, existingUser) => {
           if (err) return done(err);
 
@@ -29,8 +29,8 @@ passport.use(
           }
 
           db.run(
-            "INSERT INTO users (googleId, username, email) VALUES (?, ?, ?)",
-            [googleId, username, email],
+            "INSERT INTO users ( username, password) VALUES (?, ?)",
+            [email, "google"],
             function (err) {
               if (err) return done(err);
 
