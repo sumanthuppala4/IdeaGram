@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import GoogleButton from "./GoogleButton";
 
 function Signup() {
   const [username, setUsername] = useState("");
@@ -15,16 +16,19 @@ function Signup() {
     setMsg("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", {
-        username,
-        password,
-      });
+      const res = await axios.post(
+        "http://localhost:5000/passportAuth/register",
+        {
+          username,
+          password,
+        },
+        { withCredentials: true }
+      );
 
-      localStorage.setItem("token", res.data.token);
       setMsg(res.data.message || "Registered successfully!");
 
       // redirect after short delay
-      setTimeout(() => navigate("/dashboard"), 1000);
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed. Try again.");
     }
@@ -59,6 +63,7 @@ function Signup() {
       <p>
         Already have an account? <Link to="/login">Login</Link>
       </p>
+      <GoogleButton />
     </div>
   );
 }

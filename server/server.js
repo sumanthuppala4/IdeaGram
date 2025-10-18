@@ -4,10 +4,12 @@ import session from "express-session";
 import passport from "passport";
 import dotenv from "dotenv";
 
-import "./config/passport.js"; // Google OAuth strategy setup
+import "./config/googlePassport.js"; // Google OAuth strategy setup
 import usersRoutes from "./routes/users.js";
 import ideasRoutes from "./routes/ideas.js";
-import authRoutes from "./middleware/auth.js";
+import initialize from "./config/passportConfig.js";
+import googleAuthRoutes from "./middleware/googleAuth.js";
+import passportAuthRoutes from "./middleware/passportAuth.js";
 
 dotenv.config();
 
@@ -38,11 +40,13 @@ app.use(
 //  Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+initialize(passport);
 
 //  Routes
 app.use("/api/users", usersRoutes);
 app.use("/api/ideas", ideasRoutes);
-app.use("/auth", authRoutes);
+app.use("/auth", googleAuthRoutes);
+app.use("/passportAuth", passportAuthRoutes);
 
 //  Root route (optional)
 app.get("/", (req, res) => {
