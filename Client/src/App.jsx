@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,6 +12,7 @@ import "./App.css";
 function App() {
   // get token from localStorage
   const token = localStorage.getItem("token");
+
 
   return (
     <Router>

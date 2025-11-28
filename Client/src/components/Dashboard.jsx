@@ -21,7 +21,7 @@ function Dashboard() {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setIdeas(res.data))
-      .catch(() => navigate("/login"));
+      .catch((err) => { console.log(err);; });
   }, [navigate, token]);
 
   const handleAddIdea = async () => {
@@ -54,10 +54,10 @@ function Dashboard() {
         ideas.map((idea) =>
           idea.id === id
             ? {
-                ...idea,
-                likesCount: res.data.likes,
-                liked: res.data.liked,
-              }
+              ...idea,
+              likesCount: res.data.likes,
+              liked: res.data.liked,
+            }
             : idea
         )
       );
@@ -71,7 +71,6 @@ function Dashboard() {
     navigate("/login");
   };
 
-  console.log(ideas, "ideas");
 
   return (
     <div className="dashboard-container">
