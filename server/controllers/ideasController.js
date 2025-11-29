@@ -1,8 +1,8 @@
 // controllers/ideaController.js
 import mongoose from "mongoose";
-import Idea from "../models/Idea.js";
+import Idea from "../models/ideaModel.js";
 import IdeaLike from "../models/IdeaLike.js";
-import User from "../models/User.js";
+import User from "../models/userModel.js";
 
 const ObjectId = mongoose.Types.ObjectId;
 

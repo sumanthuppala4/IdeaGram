@@ -1,5 +1,8 @@
 // config/db.js
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const uri = process.env.MONGO_URI;
 const dbName = process.env.DB_NAME || "mydb";
@@ -40,3 +43,5 @@ export const connectDB = async () => {
 export const closeDB = async () => {
   await mongoose.disconnect();
 };
+
+
