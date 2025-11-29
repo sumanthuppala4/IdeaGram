@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server.js"
   },
   "author": "Your Name",
   "license": "MIT",
@@ -19,6 +19,7 @@
     "express-session": "^1.18.2",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^7.0.0",
+    "mongoose": "^9.0.0",
     "sqlite3": "^5.1.6"
   },
   "devDependencies": {
