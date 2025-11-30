@@ -15,7 +15,7 @@ app.use(express.json());
   try {
     await connectDB(); // connects mongoose
     // mount routes
-    app.use("/api/auth", authRoutes);
+    app.use("/api/users", authRoutes);
     app.use("/api/ideas", ideasRoutes);
 
     const PORT = process.env.PORT || 5000;

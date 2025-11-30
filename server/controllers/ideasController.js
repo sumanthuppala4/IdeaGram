@@ -58,84 +58,22 @@ export const getIdeas = async (req, res) => {
   try {
     const userId = req.userId ? new ObjectId(req.userId) : null;
 
-    // aggregation to get author, likes count and liked boolean
-    const pipeline = [
-      {
-        $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-      { $unwind: "$author" },
-      {
-        $lookup: {
-          from: "idealikess", // wrong? must be collection name "idealikess"? -> fix below
-        },
-      },
-    ];
 
-    // We'll use a clearer pipeline:
-    const agg = [
-      {
-        $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-      { $unwind: "$author" },
-      {
-        $lookup: {
-          from: "idealikess", // placeholder - but we'll avoid mistake and use correct name below
-        },
-      },
-    ];
+ const ideas = await Idea.find().populate("authorId","username").lean().select('-__v'); 
+ 
+ console.log({ideas});
+ // .lean() returns plain JS objects
+// optionally rename _id -> id
+let cleaned = ideas.map(({ _id,authorId, ...rest }) => ({ id: String(_id),author:authorId.username, ...rest }));
 
-    // Correct pipeline (using correct collection names: "idea_likes")
-    const pipelineCorrect = [
-      {
-        $lookup: {
-          from: "users",
-          localField: "authorId",
-          foreignField: "_id",
-          as: "author",
-        },
-      },
-      { $unwind: "$author" },
-      {
-        $lookup: {
-          from: "idea_likes",
-          localField: "_id",
-          foreignField: "ideaId",
-          as: "likes",
-        },
-      },
-      {
-        $addFields: {
-          likesCount: { $size: "$likes" },
-          liked: userId ? { $in: [userId, "$likes.userId"] } : false,
-        },
-      },
-      {
-        $project: {
-          id: "$_id",
-          description: 1,
-          createdAt: 1,
-          author: "$author.username",
-          likesCount: 1,
-          liked: 1,
-        },
-      },
-      { $sort: { createdAt: -1 } },
-    ];
+let ideasWithLikes=[];
 
-    const rows = await Idea.aggregate(pipelineCorrect).exec();
-    // convert id fields to string
-    const normalized = rows.map((r) => ({ ...r, id: r.id.toString() }));
-    return res.status(200).json(normalized);
+
+for (const idea of cleaned) {
+  const likesCount = await IdeaLike.countDocuments({ ideaId: idea.id });
+  ideasWithLikes.push({ ...idea, likesCount });
+}
+    return res.status(200).json(ideasWithLikes);
   } catch (err) {
     console.error("getIdeas error:", err);
     return res.status(500).json({ message: "Error fetching ideas" });
