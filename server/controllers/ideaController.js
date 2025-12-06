@@ -88,9 +88,7 @@ export const toggleLike = (req, res) => {
 };
 
 export const getLikes = (req, res) => {
-  const query = `
-      SELECT * FROM idea_likes
-    `;
+  const query = `SELECT * FROM idea_likes`;
   db.all(query, [], (err, rows) => {
     if (err) return res.status(500).json({ message: "Error fetching likes" });
     res.status(200).json(rows);
