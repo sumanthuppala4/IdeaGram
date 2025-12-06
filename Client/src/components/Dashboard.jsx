@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import opensocket from "socket.io-client";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -15,14 +16,39 @@ function Dashboard() {
       navigate("/login");
       return;
     }
-
     axios
       .get(`${BASE_URL}/ideas`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => setIdeas(res.data))
-      .catch((err) => { console.log(err);; });
+      .then((res) => {
+        setIdeas(res.data);
+      })
+
+      .catch((err) => {
+        console.log(err);
+      });
   }, [navigate, token]);
+
+  useEffect(() => {
+    const socket = opensocket("http://localhost:5000");
+
+    socket.on("newIdea", (data) => {
+      console.log("Received newIdea event:", data);
+      if (data.action === "create") {
+        setIdeas((prevIdeas) => {
+          if (prevIdeas.some((idea) => idea.id === data.idea.id)) {
+            return prevIdeas;
+          }
+
+          return [{ ...data.idea, liked: false }, ...prevIdeas];
+        });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const handleAddIdea = async () => {
     if (!newIdea.trim()) return;
@@ -33,7 +59,7 @@ function Dashboard() {
         { description: newIdea },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setIdeas([...ideas, { ...res.data, liked: false }]);
+      setIdeas([{ ...res.data, liked: false }, ...ideas]);
       setNewIdea("");
     } catch (err) {
       console.error("Error adding idea:", err);
@@ -54,10 +80,10 @@ function Dashboard() {
         ideas.map((idea) =>
           idea.id === id
             ? {
-              ...idea,
-              likesCount: res.data.likes,
-              liked: res.data.liked,
-            }
+                ...idea,
+                likesCount: res.data.likes,
+                liked: res.data.liked,
+              }
             : idea
         )
       );
@@ -70,7 +96,6 @@ function Dashboard() {
     localStorage.removeItem("token");
     navigate("/login");
   };
-
 
   return (
     <div className="dashboard-container">

@@ -4,12 +4,16 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import ideasRoutes from "./routes/ideas.js";
-import authRoutes from "./routes/authRoutes.js"; // your auth register/login routes
+import authRoutes from "./routes/authRoutes.js"; 
+import socket from "./socket.js";
+// your auth register/login routes
+
 
 dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 
 (async () => {
   try {
@@ -19,7 +23,13 @@ app.use(express.json());
     app.use("/api/ideas", ideasRoutes);
 
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    const server = app.listen(PORT);
+    console.log(`Server running on port ${PORT}`);
+    const io = socket.init(server);
+
+    io.on("connection", (socket) => {
+      console.log("New client connected");
+    });
   } catch (err) {
     console.error("Failed to start server:", err);
     process.exit(1);
