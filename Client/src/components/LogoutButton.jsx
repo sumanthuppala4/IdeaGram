@@ -9,7 +9,7 @@ export default function LogoutButton() {
     try {
       // Call backend logout route
       await axios.post(
-        "http://localhost:5000/logout", // full backend URL
+        "http://localhost:5000/api/auth/logout", // full backend URL
         {},
         { withCredentials: true } // include session cookie
       );

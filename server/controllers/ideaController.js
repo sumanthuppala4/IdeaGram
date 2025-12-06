@@ -1,0 +1,98 @@
+import db from "../db/database.js";
+
+export const createIdea = (req, res) => {
+  const { description } = req.body;
+  const userId = req.user.id;
+  const stmt = db.prepare(
+    "INSERT INTO ideas(description, authorId) VALUES(?, ?)"
+  );
+  stmt.run(description, userId, function (err) {
+    if (err) return res.status(500).json({ message: "Error creating idea" });
+
+    db.get(
+      "SELECT i.id, i.description, i.createdAt, u.username as author FROM ideas i JOIN users u ON u.id = i.authorId WHERE i.id = ?",
+      [this.lastID],
+      (err, idea) => {
+        if (err)
+          return res.status(500).json({ message: err + "Error fetching idea" });
+        res.status(200).json(idea);
+      }
+    );
+  });
+  stmt.finalize();
+};
+
+export const getIdeas = (req, res) => {
+  const userId = req.user.id;
+  const query = `
+      SELECT i.id, i.description, i.createdAt, u.username as author,
+      (SELECT COUNT(*) FROM idea_likes il WHERE il.ideaId = i.id) as likesCount,
+      EXISTS(SELECT 1 FROM idea_likes il2 WHERE il2.ideaId = i.id AND il2.userId = ?) as liked
+      FROM ideas i
+      JOIN users u ON u.id = i.authorId
+      ORDER BY i.createdAt DESC
+    `;
+  db.all(query, [userId], (err, rows) => {
+    if (err) return res.status(500).json({ message: "Error fetching ideas" });
+    res.status(200).json(rows);
+  });
+};
+
+export const toggleLike = (req, res) => {
+  const { id } = req.body;
+  const userId = req.user.id;
+
+  // Check if user already liked
+  db.get(
+    "SELECT * FROM idea_likes WHERE ideaId = ? AND userId = ?",
+    [id, userId],
+    (err, row) => {
+      if (row) {
+        // Unlike (remove like)
+        db.run(
+          "DELETE FROM idea_likes WHERE ideaId = ? AND userId = ?",
+          [id, userId],
+          (err2) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+
+            // Update likes count
+            db.get(
+              "SELECT COUNT(*) as likes FROM idea_likes WHERE ideaId = ?",
+              [id],
+              (err3, countRow) => {
+                res.json({ liked: false, likes: countRow.likes });
+              }
+            );
+          }
+        );
+      } else {
+        // Add like
+        db.run(
+          "INSERT INTO idea_likes (ideaId, userId) VALUES (?, ?)",
+          [id, userId],
+          (err2) => {
+            if (err2) return res.status(500).json({ error: err2.message });
+
+            db.get(
+              "SELECT COUNT(*) as likes FROM idea_likes WHERE ideaId = ?",
+              [id],
+              (err3, countRow) => {
+                res.json({ liked: true, likes: countRow.likes });
+              }
+            );
+          }
+        );
+      }
+    }
+  );
+};
+
+export const getLikes = (req, res) => {
+  const query = `
+      SELECT * FROM idea_likes
+    `;
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ message: "Error fetching likes" });
+    res.status(200).json(rows);
+  });
+};
