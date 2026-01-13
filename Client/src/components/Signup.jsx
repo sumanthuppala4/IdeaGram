@@ -7,17 +7,26 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
     setMsg("");
 
+    const signUpGraphQL = `
+          mutation {
+            createUser(userInput: {username: "${username}", password: "${password}"}) {
+              _id
+              username
+              passwordHash
+              createdAt
+            }
+          }
+        `;
+
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", {
-        username,
-        password,
+      const res = await axios.post("http://localhost:5000/graphql", {
+        query: signUpGraphQL,
       });
 
       localStorage.setItem("token", res.data.token);

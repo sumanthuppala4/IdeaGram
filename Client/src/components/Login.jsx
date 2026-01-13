@@ -13,12 +13,17 @@ function Login() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        username,
-        password,
+      const loginGraphQL = `
+          query {
+            login(username: "${username}", password: "${password}") 
+            { userId token} 
+             }`;
+
+      const res = await axios.post("http://localhost:5000/graphql", {
+        query: loginGraphQL,
       });
 
-      localStorage.setItem("token", res.data.token); // save JWT
+      localStorage.setItem("token", res.data.data.login.token); // save JWT
       navigate("/dashboard"); // redirect to dashboard
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");

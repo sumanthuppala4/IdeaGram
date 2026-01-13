@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "http://localhost:5000/graphql";
 
 function Dashboard() {
   const [ideas, setIdeas] = useState([]);
@@ -10,30 +10,67 @@ function Dashboard() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+  const getIdeas = () => {
+    const getIdeasGraphQL = `
+          query  {
+            getIdeas {
+              _id
+              description
+              creator {
+                username
+              }
+              likesCount
+              likedByUser
+            }
+          }
+        `;
+
+    axios
+      .post(
+        `${BASE_URL}`,
+        {
+          query: getIdeasGraphQL,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      )
+      .then((res) => setIdeas(res.data.data.getIdeas))
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
 
-    axios
-      .get(`${BASE_URL}/ideas`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then((res) => setIdeas(res.data))
-      .catch((err) => { console.log(err);; });
+    getIdeas();
   }, [navigate, token]);
 
   const handleAddIdea = async () => {
     if (!newIdea.trim()) return;
 
+    const addIdeaGraphQL = `
+    mutation {
+        createIdea(ideaInput: {description: "${newIdea}"}) 
+        {
+             _id description creator { username }  
+          }
+      }`;
+
     try {
       const res = await axios.post(
-        `${BASE_URL}/ideas`,
-        { description: newIdea },
+        BASE_URL,
+        {
+          query: addIdeaGraphQL,
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setIdeas([...ideas, { ...res.data, liked: false }]);
+
+      setIdeas([...ideas, { ...res.data.data.createIdea, likedByUser: false , likesCount: 0 }]);
       setNewIdea("");
     } catch (err) {
       console.error("Error adding idea:", err);
@@ -41,25 +78,35 @@ function Dashboard() {
   };
 
   const handleToggleLike = async (id) => {
+
+    console.log(id)
+
+    const toggleLikeGraphQL = `
+    mutation {
+        toggleLike(ideaId: "${id}") 
+        { success }
+      }
+    `;
+
     try {
-      const res = await axios.put(
-        `${BASE_URL}/ideas/toggle-like`,
-        { id },
+      await axios.post(
+        BASE_URL,
+        {
+          query: toggleLikeGraphQL,
+        },
+
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log(res, "toggle like response");
-
       setIdeas(
-        ideas.map((idea) =>
-          idea.id === id
-            ? {
-              ...idea,
-              likesCount: res.data.likes,
-              liked: res.data.liked,
-            }
-            : idea
-        )
+        ideas.map((idea) => {
+          if (idea._id !== id) return idea;
+          const likesCount = idea.likedByUser
+            ? idea.likesCount - 1
+            : idea.likesCount + 1;
+          const liked = !idea.likedByUser;
+          return { ...idea, likesCount, likedByUser: liked };
+        })
       );
     } catch (err) {
       console.error("Error toggling like:", err);
@@ -70,7 +117,6 @@ function Dashboard() {
     localStorage.removeItem("token");
     navigate("/login");
   };
-
 
   return (
     <div className="dashboard-container">
@@ -97,14 +143,14 @@ function Dashboard() {
         ) : (
           ideas.map((idea) => (
             <div key={idea.id} className="idea-card">
-              <p>Idea By :{idea.author}</p>
+              <p>Idea By :{idea.creator.username}</p>
               <p>{idea.description}</p>
               <div className="idea-actions">
                 <button
                   className={`like-btn ${idea.liked ? "liked" : ""}`}
-                  onClick={() => handleToggleLike(idea.id)}
+                  onClick={() => handleToggleLike(idea._id)}
                 >
-                  {idea.liked ? "❤️" : "🤍"}
+                  {idea.likedByUser ? "❤️" : "🤍"}
                 </button>
                 &nbsp; {idea.likesCount}
               </div>
