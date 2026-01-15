@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -13,12 +13,12 @@ function Login() {
     setError("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/login", {
-        username,
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
         password,
       });
 
-      localStorage.setItem("token", res.data.token); // save JWT
+      localStorage.setItem("token", res.data.access_token); // save JWT
       navigate("/dashboard"); // redirect to dashboard
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");
@@ -30,10 +30,10 @@ function Login() {
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
         <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 

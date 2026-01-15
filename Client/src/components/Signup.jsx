@@ -3,8 +3,9 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
 function Signup() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
   const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -15,13 +16,14 @@ function Signup() {
     setMsg("");
 
     try {
-      const res = await axios.post("http://localhost:5000/api/users/register", {
-        username,
+      const res = await axios.post("http://localhost:5000/api/auth/register", {
+        email,
         password,
+        username,
       });
 
-      localStorage.setItem("token", res.data.token);
-      setMsg(res.data.message || "Registered successfully!");
+      localStorage.setItem("token", res.data.access_token);
+      setMsg("Registered successfully!");
 
       // redirect after short delay
       setTimeout(() => navigate("/dashboard"), 1000);
@@ -35,16 +37,23 @@ function Signup() {
       <h2>Sign Up</h2>
       <form onSubmit={handleSignup}>
         <input
-          type="text"
-          placeholder="Choose a username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           required
         />
 
         <input
+          type="text"
+          placeholder="Username (optional)"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        <input
           type="password"
-          placeholder="Choose a password"
+          placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
