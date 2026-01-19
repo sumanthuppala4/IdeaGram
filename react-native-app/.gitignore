@@ -1,0 +1,67 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Dependencies
+node_modules
+.yarn/install-state.gz
+
+# Testing
+coverage
+
+# Production
+build
+
+# Misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS
+Thumbs.db
+
+# Android/IntelliJ
+android/
+.gradle
+local.properties
+*.iml
+
+# iOS/Xcode
+ios/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace/
+DerivedData/
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Watchman
+watchman-output.log
+
+# Babel
+.babelrc.js
