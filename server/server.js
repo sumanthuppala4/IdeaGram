@@ -5,11 +5,15 @@ import cors from "cors";
 import { connectDB } from "./config/db.js";
 import ideasRoutes from "./routes/ideas.js";
 import authRoutes from "./routes/authRoutes.js"; // your auth register/login routes
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 dotenv.config();
 const app = express();
 app.use(cors());
+app.options("*",cors())
 app.use(express.json());
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 (async () => {
   try {

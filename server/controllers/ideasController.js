@@ -12,7 +12,8 @@ const ObjectId = mongoose.Types.ObjectId;
 export const createIdea = async (req, res) => {
   try {
     const { description } = req.body;
-    if (!description || !description.trim()) return res.status(400).json({ message: "Description is required" });
+    if (!description || !description.trim())
+      return res.status(400).json({ message: "Description is required" });
 
     const authorId = req.userId;
     if (!authorId) return res.status(401).json({ message: "Unauthorized" });
@@ -58,21 +59,35 @@ export const getIdeas = async (req, res) => {
   try {
     const userId = req.userId ? new ObjectId(req.userId) : null;
 
+    const ideas = await Idea.find()
+      .populate("authorId", "username")
+      .lean()
+      .select("-__v");
 
- const ideas = await Idea.find().populate("authorId","username").lean().select('-__v'); 
- 
- console.log({ideas});
- // .lean() returns plain JS objects
-// optionally rename _id -> id
-let cleaned = ideas.map(({ _id,authorId, ...rest }) => ({ id: String(_id),author:authorId.username, ...rest }));
+    // .lean() returns plain JS objects
+    // optionally rename _id -> id
+    let cleaned = ideas.map(({ _id, authorId, ...rest }) => ({
+      id: String(_id),
+      author: authorId.username,
+      ...rest,
+    }));
 
-let ideasWithLikes=[];
+    let ideasWithLikes = [];
 
+    for (const idea of cleaned) {
+      const likesCount = await IdeaLike.countDocuments({ ideaId: idea.id });
+      const liked = await IdeaLike.countDocuments({
+        ideaId: idea.id,
+        userId: userId,
+      });
 
-for (const idea of cleaned) {
-  const likesCount = await IdeaLike.countDocuments({ ideaId: idea.id });
-  ideasWithLikes.push({ ...idea, likesCount });
-}
+      ideasWithLikes.push({
+        ...idea,
+        likesCount,
+        liked: liked === 1 ? true : false,
+      });
+    }
+
     return res.status(200).json(ideasWithLikes);
   } catch (err) {
     console.error("getIdeas error:", err);
@@ -116,7 +131,11 @@ export const toggleLike = async (req, res) => {
 export const getUsers = async (req, res) => {
   try {
     const users = await User.find({}, { passwordHash: 0 }).sort("id").lean();
-    const mapped = users.map((u) => ({ id: u._id.toString(), username: u.username, createdAt: u.createdAt }));
+    const mapped = users.map((u) => ({
+      id: u._id.toString(),
+      username: u.username,
+      createdAt: u.createdAt,
+    }));
     return res.status(200).json(mapped);
   } catch (err) {
     console.error("getUsers error:", err);
@@ -130,7 +149,10 @@ export const getUsers = async (req, res) => {
 export const getLikes = async (req, res) => {
   try {
     const rows = await IdeaLike.find().lean();
-    const mapped = rows.map((r) => ({ ideaId: r.ideaId.toString(), userId: r.userId.toString() }));
+    const mapped = rows.map((r) => ({
+      ideaId: r.ideaId.toString(),
+      userId: r.userId.toString(),
+    }));
     return res.status(200).json(mapped);
   } catch (err) {
     console.error("getLikes error:", err);

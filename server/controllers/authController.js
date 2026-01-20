@@ -15,7 +15,7 @@ const createToken = (user) => {
   return jwt.sign(
     { sub: user._id.toString(), username: user.username },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES }
+    { expiresIn: JWT_EXPIRES },
   );
 };
 
@@ -90,7 +90,7 @@ export const login = async (req, res) => {
 
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid)
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res.status(401).json({ message: "password is incorrect" });
 
     // update last login
     user.lastLoginAt = new Date();
