@@ -33,7 +33,7 @@ export const connectDB = async () => {
     return db;
 
   } catch (err) {
-    console.error(" MongoDB connection error:", err);
+    console.error("MongoDB connection error: please check connection", err);
     throw err; // important: rethrow so server.js knows it failed
   }
 };
