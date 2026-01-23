@@ -1,15 +1,12 @@
 const db = require("../db/database");
 
 function postIdea(req, res) {
-  console.log("hello");
-  console.log(req.userId);
   const { description } = req.body;
   const stmt = db.prepare(
     "INSERT INTO ideas(description, authorId) VALUES(?, ?)",
   );
 
   stmt.run(description, req.userId, function (err) {
-    console.log(err, "err");
     if (err) return res.status(500).json({ message: "Error creating idea" });
 
     db.get(
@@ -26,7 +23,6 @@ function postIdea(req, res) {
 }
 
 async function getIdeas(req, res) {
-  console.log("hello");
   const userId = req.userId;
   const query = `
       SELECT i.id, i.description, i.createdAt, u.username as author,

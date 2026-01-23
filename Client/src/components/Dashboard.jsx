@@ -48,7 +48,6 @@ function Dashboard() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log(res, "toggle like response");
 
       setIdeas(
         ideas.map((idea) =>
@@ -71,7 +70,6 @@ function Dashboard() {
     navigate("/login");
   };
 
-  console.log(ideas, "ideas");
 
   return (
     <div className="dashboard-container">
