@@ -96,7 +96,7 @@ function Dashboard() {
         ) : (
           ideas.map((idea) => (
             <div key={idea.id} className="idea-card">
-              <p>Idea By :{idea.author}</p>
+              <p>Idea By :{idea.username}</p>
               <p>{idea.description}</p>
               <div className="idea-actions">
                 <button

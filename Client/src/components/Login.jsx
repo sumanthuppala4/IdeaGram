@@ -3,8 +3,8 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 
 function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("sumanth");
+  const [password, setPassword] = useState("12345");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 

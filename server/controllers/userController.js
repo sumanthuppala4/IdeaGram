@@ -1,49 +1,59 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const db = require("../db/database");
+const { User } = require("../models");
 
 const JWT_SECRET = "jwtSecretKey";
 
-function register(req, res) {
+async function register(req, res) {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ message: "All fields required" });
 
-  bcrypt.hash(password, 10, (err, hashedPassword) => {
-    if (err) return res.status(500).json({ message: "Hashing error" });
+  const hashPassword = await bcrypt.hash(password, 10);
 
-    const stmt = db.prepare(
-      "INSERT INTO users(username, password) VALUES (?, ?)",
-    );
-    stmt.run(username, hashedPassword, function (err) {
-      if (err)
-        return res.status(400).json({ message: "Username already exists" });
+  try {
+    const user = await User.create({ username, password: hashPassword });
 
-      const token = jwt.sign({ id: this.lastID }, JWT_SECRET, {
-        expiresIn: "1d",
-      });
-      res.json({ token, username });
+    console.log(user.id,"userId")
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+      expiresIn: "1d",
     });
-  });
+    res.json({ token, username });
+  } catch (error) {
+    res.status(400).json({ message: "Username already exists" });
+  }
 }
 
-function login(req, res) {
+async function login(req, res) {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ message: "All fields required" });
 
-  db.get("SELECT * FROM users WHERE username = ?", [username], (err, user) => {
-    if (err || !user)
-      return res.status(400).json({ message: "Invalid credentials" });
-
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (!isMatch)
-        return res.status(400).json({ message: "Invalid credentials" });
-
-      const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1d" });
-      res.json({ token, username: user.username });
-    });
+  const user = await User.findOne({
+    where: {
+      username:username
+    },
   });
+
+
+  if (!user) {
+    return res.status(400).json({ message: "Not A registred User" });
+  }
+
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
+  if (!isValidPassword) {
+    return res.status(400).json({ message: "Incorrect Password" });
+  }
+
+  const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1d" });
+  res.json({ token, username: user.username });
 }
 
-module.exports = { register, login };
+async function getUsers(req, res) {
+  const users = await User.findAll({});
+  return res.json(users);
+}
+
+module.exports = { register, login ,getUsers};

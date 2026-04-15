@@ -1,5 +1,4 @@
 const express = require("express");
-const db = require("../db/database");
 const auth = require("../middleware/auth");
 const {
   postIdea,
@@ -11,14 +10,11 @@ const {
 
 const app = express.Router();
 
-app.post("/", auth, postIdea);
-
-// Get all ideas
 app.get("/", auth, getIdeas);
 
-app.put("/toggle-like", auth, toggleLike);
+app.post("/", auth, postIdea);
 
-app.get("/users", auth, getUsers);
+app.put("/toggle-like", auth, toggleLike);
 
 app.get("/likes", auth, getLikes);
 
